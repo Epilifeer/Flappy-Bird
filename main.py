@@ -1,4 +1,4 @@
-import pygame, pgzero, pgzrun, random
+import pygame, pgzero, pgzrun, random, sys
 from pgzhelper import *
 
 # Tamanho da tela
@@ -32,10 +32,12 @@ nuvem_y = 100
 fundo = pygame.image.load('images/fundo.png')
 fundo_x = 0
 fundo_y = 0
+gameover_overlay = pygame.image.load('images/gameover.png')
     
 # Variáveis globais
 dt_global = 0
 pontos = 0
+gameover = False
 
 # Música e sons
 #  music.play('zapzap.wav')
@@ -43,29 +45,34 @@ pontos = 0
 
 # Desenha na tela todos os objetos
 def draw():
-    global dt_global
+    global dt_global, gameover
 
-    screen.fill((255, 255, 255))
-    screen.blit(nuvem, (nuvem_x, nuvem_y))
-    screen.blit(fundo, (fundo_x, fundo_y))
-    screen.blit(nuvem, (nuvem_x+300, nuvem_y+200))
-    screen.blit(nuvem, (nuvem_x+700, nuvem_y+500))
-    passaro.pos = ((passaro_x, passaro_y))
-    passaro.draw()
-    screen.blit(tubo_img, (tubo_x, tubo_y))
-    screen.blit(tubo2_img, (tubo2_x, tubo2_y))
-    screen.draw.text(f"Tempo: {dt_global}", topright=(700, 20), color="#41E95F", fontname='matchuppro.ttf', fontsize=30, owidth=1.5, ocolor="#000000")
-    screen.draw.text(f"Pontos: {pontos}", topright=(150, 20), color="#41E95F", fontname='matchuppro.ttf', fontsize=30, owidth=1.5, ocolor="#000000")
-    screen.draw.text(f"Dt: {dt_global/10000}", topright=(300, 20), color="#41E95F", fontname='matchuppro.ttf', fontsize=30, owidth=1.5, ocolor="#000000")
+    if not gameover:
+        screen.blit(fundo, (fundo_x, fundo_y))
+        screen.blit(nuvem, (nuvem_x, nuvem_y))
+        screen.blit(nuvem, (nuvem_x+300, nuvem_y+200))
+        screen.blit(nuvem, (nuvem_x+700, nuvem_y+500))
+        passaro.pos = ((passaro_x, passaro_y))
+        passaro.draw()
+        screen.blit(tubo_img, (tubo_x, tubo_y))
+        screen.blit(tubo2_img, (tubo2_x, tubo2_y))
+        screen.draw.text(f"Tempo: {dt_global}", topright=(700, 20), color="#41E95F", fontname='matchuppro.ttf', fontsize=30, owidth=1.5, ocolor="#000000")
+        screen.draw.text(f"Pontos: {pontos}", topright=(150, 20), color="#41E95F", fontname='matchuppro.ttf', fontsize=30, owidth=1.5, ocolor="#000000")
+        screen.draw.text(f"Dt: {dt_global/10000}", topright=(300, 20), color="#41E95F", fontname='matchuppro.ttf', fontsize=30, owidth=1.5, ocolor="#000000")
+    else:
+        screen.blit(gameover_overlay, (0,0))
 
-# Verificar e fazer o pássaro voar
+# Verifica e dar ações para as teclas
 def on_key_down(key):
-    global passaro_speed, passaro_y
+    global passaro_speed, passaro_y, gameover
 
-    if key == keys.SPACE and passaro_y < HEIGHT-200:
+    if key == keys.SPACE and passaro_y < HEIGHT-200 and gameover == False:
         passaro_speed -= random.uniform(200, 300)    
         sounds.asa.play()
         passaro.animate()
+    if key == keys.F and gameover == True:
+        pygame.quit()
+        sys.exit()
 
 # Verificar e mostrar a tela de morte
 def verificar_morte():
@@ -124,7 +131,7 @@ def verificar_pontos():
 
 # Detecta a colisao do player com os tubos e chama a morte
 def colisao():
-    global passaro_x, passaro_y
+    global passaro_x, passaro_y, gameover
     global tubo_x, tubo_y
     global tubo2_x, tubo2_y
 
@@ -139,19 +146,20 @@ def colisao():
     retangulo_tubo2.y = tubo2_y
 
     if retangulo_player.colliderect(retangulo_tubo1) or retangulo_player.colliderect(retangulo_tubo2):
-        print('passarinho morreu')
+        gameover = True
 
 # Faz a atualização de todo o jogo
 def update(dt):
-    global dt_global
+    global dt_global, gameover
     
-    virar_angulo()
-    verificar_morte()
-    andar_objetos(dt)    
-    verificar_pontos()
-    colisao()
-    dt_global = pygame.time.get_ticks()
+    if not gameover:
+        virar_angulo()
+        verificar_morte()
+        andar_objetos(dt)    
+        verificar_pontos()
+        colisao()
+        dt_global = pygame.time.get_ticks()        
     pass
-
+ 
 # Inicia o jogo
 pgzrun.go()
