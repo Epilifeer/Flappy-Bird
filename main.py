@@ -5,6 +5,7 @@ from pgzhelper import *
 WIDTH = 800
 HEIGHT = 800
 
+
 # Passaro variaveis
 passaro_x = 200
 passaro_y = 200
@@ -38,10 +39,16 @@ gameover_overlay = pygame.image.load('images/gameover.png')
 dt_global = 0
 pontos = 0
 gameover = False
+velocidade = 0
 
 # Música e sons
 #  music.play('zapzap.wav')
 #  music.set_volume(0.1)
+
+# Cria retângulos de colisão nos tubos e no player
+retangulo_player = passaro.get_rect()
+retangulo_tubo1 = tubo_img.get_rect()
+retangulo_tubo2 = tubo2_img.get_rect()
 
 # Desenha na tela todos os objetos
 def draw():
@@ -66,20 +73,20 @@ def draw():
 def on_key_down(key):
     global passaro_speed, passaro_y, gameover
 
-    if key == keys.SPACE and passaro_y < HEIGHT-200 and gameover == False:
+    if key == keys.SPACE and gameover == False:
         passaro_speed -= random.uniform(200, 300)    
         sounds.asa.play()
-        passaro.animate()
+        #passaro.animate()
     if key == keys.F and gameover == True:
         pygame.quit()
         sys.exit()
 
 # Verificar e mostrar a tela de morte
 def verificar_morte():
-    global passaro_y
+    global passaro_y, gameover
 
     if passaro_y < 0:
-        print("Game Over")
+        gameover = True
 
 # Muda o ângulo do pássaro para simular que está caindo melhor
 def virar_angulo():
@@ -109,10 +116,12 @@ def andar_objetos(dt):
         tubo2_x = WIDTH - tubo2_x + 300
         espaco_tubos = random.randint(50, 100)
         tubo2_y = (-900 + espaco_tubos) + random.randint(0, 100)
+
     if nuvem_x>-237:
         nuvem_x -= int(100 * dt)
     else:
         nuvem_x = WIDTH+237
+
     if fundo_x>-1120:
         fundo_x -= int(70 * dt)
     else:
@@ -123,21 +132,20 @@ def andar_objetos(dt):
 
 # Verifica e soma os pontos
 def verificar_pontos():
-    global pontos
+    global pontos, passando_entre_tubos
 
-    if passaro_x > tubo_x-1  and passaro_x < tubo_x+1:
+    if passaro_x > tubo_x-1 and passaro_x < tubo_x+1 :
+        passando_entre_tubos = True
         pontos += 1
-        sounds.ponto.play()
+        sounds.ponto.play()        
 
 # Detecta a colisao do player com os tubos e chama a morte
 def colisao():
     global passaro_x, passaro_y, gameover
     global tubo_x, tubo_y
     global tubo2_x, tubo2_y
+    global retangulo_player, retangulo_tubo1, retangulo_tubo2
 
-    retangulo_player = passaro.get_rect()
-    retangulo_tubo1 = tubo_img.get_rect()
-    retangulo_tubo2 = tubo2_img.get_rect()
     retangulo_player.x = passaro_x
     retangulo_player.y = passaro_y
     retangulo_tubo1.x = tubo_x
