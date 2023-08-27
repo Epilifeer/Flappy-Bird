@@ -18,7 +18,6 @@ passaro.fps = 60
 
 # Tubos
 espaco_tubos = random.randint(50, 250)
-
 tubo_img = pygame.image.load('images/tubo.png')
 tubo_y = (900 - espaco_tubos) - random.randint(0, 100)
 tubo_x = WIDTH-199
@@ -34,7 +33,7 @@ fundo = pygame.image.load('images/fundo.png')
 fundo_x = 0
 fundo_y = 0
     
-# vars globais
+# Variáveis globais
 dt_global = 0
 pontos = 0
 
@@ -42,8 +41,10 @@ pontos = 0
 #  music.play('zapzap.wav')
 #  music.set_volume(0.1)
 
+# Desenha na tela todos os objetos
 def draw():
     global dt_global
+
     screen.fill((255, 255, 255))
     screen.blit(nuvem, (nuvem_x, nuvem_y))
     screen.blit(fundo, (fundo_x, fundo_y))
@@ -57,24 +58,26 @@ def draw():
     screen.draw.text(f"Pontos: {pontos}", topright=(150, 20), color="#41E95F", fontname='matchuppro.ttf', fontsize=30, owidth=1.5, ocolor="#000000")
     screen.draw.text(f"Dt: {dt_global/10000}", topright=(300, 20), color="#41E95F", fontname='matchuppro.ttf', fontsize=30, owidth=1.5, ocolor="#000000")
 
-
-#Verificar e fazer o passaro voar
+# Verificar e fazer o pássaro voar
 def on_key_down(key):
     global passaro_speed, passaro_y
-    if key == keys.SPACE and passaro_y < HEIGHT-200:
-        passaro_speed -= random.uniform(200, 300)
-        
-        sounds.asa.play()
 
-#Verificar e mostrar a tela de morte
+    if key == keys.SPACE and passaro_y < HEIGHT-200:
+        passaro_speed -= random.uniform(200, 300)    
+        sounds.asa.play()
+        passaro.animate()
+
+# Verificar e mostrar a tela de morte
 def verificar_morte():
     global passaro_y
+
     if passaro_y < 0:
         print("Game Over")
 
-#"Anima" o passaro para simular que está caindo melhor
+# Muda o ângulo do pássaro para simular que está caindo melhor
 def virar_angulo():
     global passaro_speed
+
     if passaro_speed > 0 and passaro.angle > -90:
         passaro.angle -= random.uniform(0.5, 1)
     elif passaro_speed < 0 and passaro.angle < 20:
@@ -84,8 +87,9 @@ def virar_angulo():
 def andar_objetos(dt):
     global passaro_y, passaro_speed, dt_global
     global tubo_x, tubo_y, tubo_img, espaco_tubos
-    global tubo2_x, tubo2_y, tubo2_img, nuvem_x
-    global fundo_x
+    global tubo2_x, tubo2_y, tubo2_img
+    global fundo_x , nuvem_x
+
     if tubo_x > -100:
         tubo_x -= int(165 * dt)
     else:
@@ -106,27 +110,48 @@ def andar_objetos(dt):
         fundo_x -= int(70 * dt)
     else:
         fundo_x = 0
+
     passaro_speed += random.uniform(300, 400) * dt
     passaro_y += passaro_speed * dt
 
-#Verifica e soma os pontos
+# Verifica e soma os pontos
 def verificar_pontos():
     global pontos
+
     if passaro_x > tubo_x-1  and passaro_x < tubo_x+1:
         pontos += 1
         sounds.ponto.play()
 
+# Detecta a colisao do player com os tubos e chama a morte
+def colisao():
+    global passaro_x, passaro_y
+    global tubo_x, tubo_y
+    global tubo2_x, tubo2_y
+
+    retangulo_player = passaro.get_rect()
+    retangulo_tubo1 = tubo_img.get_rect()
+    retangulo_tubo2 = tubo2_img.get_rect()
+    retangulo_player.x = passaro_x
+    retangulo_player.y = passaro_y
+    retangulo_tubo1.x = tubo_x
+    retangulo_tubo1.y = tubo_y
+    retangulo_tubo2.x = tubo2_x
+    retangulo_tubo2.y = tubo2_y
+
+    if retangulo_player.colliderect(retangulo_tubo1) or retangulo_player.colliderect(retangulo_tubo2):
+        print('passarinho morreu')
+
+# Faz a atualização de todo o jogo
 def update(dt):
     global dt_global
-    passaro.animate()
+    
     virar_angulo()
     verificar_morte()
     andar_objetos(dt)    
     verificar_pontos()
+    colisao()
     dt_global = pygame.time.get_ticks()
-    
-    '''if passaro.collidepoint_pixel(  ):
-        print('col')'''
     pass
 
+# Inicia o jogo
 pgzrun.go()
