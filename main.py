@@ -17,7 +17,7 @@ textos_dica_x = 150
 # Carrega as imagens dos objetos
 tubo_img = pygame.image.load('images/tubo.png')
 tubo2_img = pygame.image.load('images/tubo2.png')
-nuvem = pygame.image.load('images/nuvem.png')
+nuvem = pygame.image.load('images/nuvem_1.png')
 fundo = pygame.image.load('images/fundo.png')
 gameover_overlay = pygame.image.load('images/gameover.png')
 
@@ -28,7 +28,7 @@ retangulo_tubo2 = tubo2_img.get_rect()
 
 # Função que inicia as variáveis, para depois chamar ela e resetar o jogo
 def Iniciar():
-    global passaro_x, passaro_y, passaro_x, passaro_speed, espaco_tubos, espaco_tubos_y, tubo_x, tubo_y, tubo2_x, tubo2_y, nuvem_x, nuvem_y, fundo_x, fundo_y, dt_global, pontos, gameover
+    global passaro_x, passaro_y, passaro_x, passaro_speed, espaco_tubos, espaco_tubos_y, tubo_x, tubo_y, tubo2_x, tubo2_y, nuvem_x, fundo_x, fundo_y, dt_global, pontos, gameover, clock
     
     # Passaro variaveis
     passaro_x = 200
@@ -43,8 +43,7 @@ def Iniciar():
     tubo2_y = (-900 + espaco_tubos) + random.randint(0, 100)
     tubo2_x = WIDTH-199
     # Cenário
-    nuvem_x = 700
-    nuvem_y = 100
+    nuvem_x = 0
     fundo_x = 0
     fundo_y = 0
     # Variáveis globais
@@ -54,16 +53,17 @@ def Iniciar():
     # Música
     music.play('zapzap.wav')
     music.set_volume(0.01)
+    clock = pygame.time.Clock()
+    
 
 # Chama os valores iniciais
 Iniciar()
 
 # Desenha na tela todos os objetos
 def draw():
+    screen.clear()
     screen.blit(fundo, (fundo_x, fundo_y))
-    screen.blit(nuvem, (nuvem_x, nuvem_y))
-    screen.blit(nuvem, (nuvem_x+300, nuvem_y+200))
-    screen.blit(nuvem, (nuvem_x+700, nuvem_y+500))
+    screen.blit(nuvem, (nuvem_x, 0))
     if textos_dica_x>-650:
         screen.draw.text(f"Aperte espaço para dar uma voada", (textos_dica_x, 200), color="#41E95F", fontname='matchuppro.ttf', fontsize=30, owidth=1.5, ocolor="#000000")
         screen.draw.text(f"Não esbarre nos canos, para não bater de cara no cano!", (textos_dica_x, 225), color="#41E95F", fontname='matchuppro.ttf', fontsize=30, owidth=1.5, ocolor="#000000")
@@ -74,6 +74,9 @@ def draw():
     screen.draw.text(f"Tempo: {dt_global}", topright=(700, 20), color="#41E95F", fontname='matchuppro.ttf', fontsize=30, owidth=1.5, ocolor="#000000")
     screen.draw.text(f"Pontos: {pontos}", topright=(150, 20), color="#41E95F", fontname='matchuppro.ttf', fontsize=30, owidth=1.5, ocolor="#000000")
     screen.draw.text(f"Dt: {dt_global/10000}", topright=(300, 20), color="#41E95F", fontname='matchuppro.ttf', fontsize=30, owidth=1.5, ocolor="#000000")
+    
+    clock.tick()
+    screen.draw.text(f"FPS: {int(clock.get_fps())}", topright=(500, 20), color="#41E95F", fontname='matchuppro.ttf', fontsize=30, owidth=1.5, ocolor="#000000")
     
     if gameover:
         screen.blit(gameover_overlay, (0,0))
@@ -122,13 +125,13 @@ def andar_objetos(dt):
         tubo2_y = -(espaco_tubos_y - (espaco_tubos / 2))
         print(tubo2_y)
 
-    if nuvem_x>-900:
-        nuvem_x -= int(100 * dt)
+    if nuvem_x>-nuvem.get_width():
+        nuvem_x -= int(60 * dt)
     else:
-        nuvem_x = WIDTH+237
+        nuvem_x = WIDTH+nuvem.get_width()
 
-    if fundo_x>-1120:
-        fundo_x -= int(70 * dt)
+    if fundo_x>-fundo.get_width():
+        fundo_x -= int(40 * dt)
     else:
         fundo_x = 0
     if textos_dica_x>-650:
